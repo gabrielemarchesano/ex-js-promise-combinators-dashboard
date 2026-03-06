@@ -19,19 +19,30 @@ Testa la funzione con la query "london"
 
 */
 
+// funzione di supporto
+async function fetchJson(url){
+  const response = await fetch(url);
+  const obj = await response.json();
+  return obj;
+}
+
 const getDashboardData = async (query) => {
-  const cityResponse = await fetch(`http://localhost:3333/destinations?search=${query}`);
-  const city = await cityResponse.json();
-  const weatherResponse = await fetch(`http://localhost:3333/weathers?search=${query}`)
-  const weather = await weatherResponse.json();
-  const airportResponse = await fetch(`http://localhost:3333/airports?search=${query}`);
-  const airport = await airportResponse.json();
+  // togliamo await dai fetch così da poter eseguire in parallelo grazie a Promise.all()
+  const cityResponse = fetchJson(`http://localhost:3333/destinations?search=${query}`);
+  const weatherResponse = fetchJson(`http://localhost:3333/weathers?search=${query}`);
+  const airportResponse = fetchJson(`http://localhost:3333/airports?search=${query}`);
+  
+  // array di promises
+  const promises = [cityResponse, weatherResponse, airportResponse];
+  // destrutturiamo il risultato del Promise.all()
+  const [ destinations, weathers, airports ] = await Promise.all(promises);
+
   return {
-    "city": city[0].name,
-    "country": city[0].country, 
-    "weather": weather[0].weather_description,
-    "temperature": weather[0].temperature,
-    "airport": airport[0].name
+    "city": destinations[0].name,
+    "country": destinations[0].country, 
+    "weather": weathers[0].weather_description,
+    "temperature": weathers[0].temperature,
+    "airport": airports[0].name
   };
 }
 
