@@ -18,3 +18,29 @@ Stampare i dati in console in un messaggio ben formattato.
 Testa la funzione con la query "london"
 
 */
+
+const getDashboardData = async (query) => {
+  const cityResponse = await fetch(`http://localhost:3333/destinations?search=${query}`);
+  const city = await cityResponse.json();
+  const weatherResponse = await fetch(`http://localhost:3333/weathers?search=${query}`)
+  const weather = await weatherResponse.json();
+  const airportResponse = await fetch(`http://localhost:3333/airports?search=${query}`);
+  const airport = await airportResponse.json();
+  return {
+    "city": city[0].name,
+    "country": city[0].country, 
+    "weather": weather[0].weather_description,
+    "temperature": weather[0].temperature,
+    "airport": airport[0].name
+  };
+}
+
+(async () => {
+  const data = await getDashboardData("london");
+  console.log(data);
+  console.log(
+    `${data.city} is in ${data.country}.\n` +
+    `Today there are ${data.temperature} degrees and the weather is ${data.weather}\n` +
+    `The main airport of ${data.city} is ${data.airport}`
+  )
+}) ();
